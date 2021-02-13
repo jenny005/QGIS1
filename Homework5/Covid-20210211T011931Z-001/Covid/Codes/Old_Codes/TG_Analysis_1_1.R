@@ -1,0 +1,11 @@
+#load libraries and functions ====================
+rm(list = ls())
+library(easypackages)
+libraries("tidyverse","fpp2","gridExtra","zoo","GGally","foreign","ggrepel","readxl")
+dirnow=getwd()
+df1=read.csv("../Data/Raw/us-counties.csv",header = T)
+df1=df1%>% rename_all(. %>% toupper() %>% gsub(" ", "_", .))
+df2=df1%>%mutate(across(where(is_character),as_factor))%>%rename_all(. %>% toupper() %>% gsub(" ", "_", .))
+df3=df2 %>% group_by(COUNTY) %>% summarise(CASES_TOTAL = sum(CASES,na.rm = T))
+df3$DATE=as.Date(df3$DATE)
+df3=df3%>%mutate(MA7_DAILY=rollmean(CASES_TOTAL-lag(CASES_TOTAL,1),7,fill=NA))
